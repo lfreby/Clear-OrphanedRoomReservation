@@ -246,14 +246,14 @@ function Send-Report
 #connect to to Exchange Remote Shell
 try
 {
-    Write-Host ("> Connecting to Exchange Remote PShell Session " + $serverFQDN)
+    Write-Verbose "Connecting to $serverFQDN via Remote Powershell"
     $exSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri http://$serverFQDN/PowerShell/ -Authentication Kerberos
     Import-PSSession $exSession -DisableNameChecking -AllowClobber | out-null
 }
 catch
 {
-    Write-Host ("Connecting to Exchange Remote PShell Session " + $serverFQDN + " Failed") -ForegroundColor Red
-    Throw $_
+    Write-LogResult -Activity "Connecting to Exchange via Remote Powershell" -Item $serverFQDN -Result "Failure" -ErrMessage $PSItem
+    Write-Error $PSItem
 }
 
 if ($SearchDays)
@@ -275,7 +275,7 @@ foreach ($mailboxDatabase in $mailboxDatabaseList)
     Write-Verbose "Parsing Database $mailboxDatabase for disconnected mailboxes"
     $disconnectedMailboxList += Get-MailboxStatistics -Database $mailboxDatabase.Name | `
         Where-Object {$_.DisconnectReason -eq "Disabled" -and $_.DisconnectDate -ge $searchDate} | `
-            Select-Object -ExpandProperty DisplayName
+        Select-Object -ExpandProperty DisplayName
 }
 
 # Retrieve list of recently disabled user mailboxes
@@ -297,8 +297,7 @@ foreach ($disconnectedMailbox in $disconnectedMailboxList)
     $searchQuery += "From:`"$disconnectedMailbox`" or "
 }
 $searchQuery = $searchQuery -Replace " or $", ")"
-Write-Verbose "Search query:"
-Write-Verbose $searchQuery
+Write-Verbose "Search query: $searchQuery"
 
 # Run search query and delete against each room mailbox
 Try
