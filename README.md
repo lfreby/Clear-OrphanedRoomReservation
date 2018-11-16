@@ -12,4 +12,4 @@ The script will lookup the list of disconnected mailboxes on Exchange, then buil
 Filter the input list to mailboxes that were disconnected in the last <SearchDays> 
 
 ## EXAMPLE
-.\Clear-OrphanedRoomReservation -SearchDays 2
+.\Clear-OrphanedRoomReservation -SearchDays 2 -Verbose
